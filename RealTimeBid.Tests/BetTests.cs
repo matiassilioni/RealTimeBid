@@ -56,7 +56,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -65,7 +65,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[0].Id, winner.Id);
         }
@@ -109,7 +109,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -118,7 +118,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[1].Id, winner.Id);
         }
@@ -162,7 +162,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -171,7 +171,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[1].Id, winner.Id);
         }
@@ -220,7 +220,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -229,7 +229,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[0].Id, winner.Id);
         }
@@ -281,7 +281,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -290,7 +290,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[1].Id, winner.Id);
         }
@@ -345,7 +345,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -354,7 +354,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[0].Id, winner.Id);
 
@@ -369,7 +369,7 @@ namespace RealTimeBid.Tests
             //also periodically called by controller
             advertiserRepository.UpdateHourlyPrints();
 
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
             //next advertiser is different
             
             Assert.Equal(dbAdvertisers[1].Id, winner.Id);
@@ -414,7 +414,7 @@ namespace RealTimeBid.Tests
 
             advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
 
-            var rtmService = new RtmBidService(advertiserCache, printNotificationService, datetimeService);
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
 
             var bid = new Bid
             {
@@ -423,7 +423,7 @@ namespace RealTimeBid.Tests
             };
 
             Advertiser winner = null;
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
 
             Assert.Equal(dbAdvertisers[0].Id, winner.Id);
             //from notification service, print takes message from queue and calls:
@@ -439,9 +439,8 @@ namespace RealTimeBid.Tests
             Assert.Equal(dbAdvertisers[0].Id, winner.Id);
 
             //next advertiser is different
-            winner = rtmService.Advertise(bid);
+            winner = rtService.Advertise(bid);
             Assert.Equal(dbAdvertisers[1].Id, winner.Id);
-
         }
     }
 }

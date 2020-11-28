@@ -2,13 +2,13 @@
 
 namespace RealTimeBid.Core
 {
-    public class RtmBidService
+    public class RtBidService
     {
         private readonly IAdvertisersCache advertisersCache;
         private readonly IPrintNotificationService printNotificationService;
         private readonly IDateTimeService dateTimeService;
 
-        public RtmBidService(
+        public RtBidService(
             IAdvertisersCache advertisersCache,
             IPrintNotificationService printNotificationService,
             IDateTimeService dateTimeService
