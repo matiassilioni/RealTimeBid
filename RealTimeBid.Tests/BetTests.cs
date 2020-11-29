@@ -442,5 +442,75 @@ namespace RealTimeBid.Tests
             winner = rtService.Advertise(bid);
             Assert.Equal(dbAdvertisers[1].Id, winner.Id);
         }
+
+
+        [Fact]
+        public void NoWinnerExeedsBudget()
+        {
+            var wednesday = new DateTime(2020, 11, 25, 12, 0, 0); //wed noon
+            var dbAdvertisers = new List<DbAdvertiser>();
+            
+            //wins just once
+            dbAdvertisers.Add(new DbAdvertiser
+            {
+                CPM = 10,
+                Enabled = true,
+                Id = Guid.NewGuid().ToString(),
+                RequiredTags = new List<Tag> { new Tag { Key = "key1", Value = "value1" }, new Tag { Key = "key2", Value = "value2" } },
+                RejectedTags = new List<Tag> { new Tag { Key = "key1", Value = "value2" }, new Tag { Key = "key2", Value = "value1" }, },
+                WorkingCalendar = null,//no date restrictions
+                CurrentHourlyPrints = 999,//needs 1 print to exceed
+                MaxHourlyBudget = 10, //just 1 print
+            });
+            //rejects by tag key2
+            dbAdvertisers.Add(new DbAdvertiser
+            {
+                CPM = 1,
+                Enabled = true,
+                Id = Guid.NewGuid().ToString(),
+                RequiredTags = new List<Tag> { new Tag { Key = "key1", Value = "value1" } },
+                RejectedTags = new List<Tag> { new Tag { Key = "key2", Value = "value2" } },
+                WorkingCalendar = null,//no date restrictions
+                MaxHourlyBudget = decimal.MaxValue,//no budgetRestrictions
+            });
+
+            var printNotificationService = Substitute.For<IPrintNotificationService>();
+            var datetimeService = Substitute.For<IDateTimeService>();
+            datetimeService.GetCurrentDateTime().Returns(wednesday);
+
+            var advertiserRepository = new AdvertiserRepository(dbAdvertisers, datetimeService);
+
+            var advertiserCache = new AdvertiserCache(datetimeService);
+
+            advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
+
+            var rtService = new RtBidService(advertiserCache, printNotificationService, datetimeService);
+
+            var bid = new Bid
+            {
+                ID = Guid.NewGuid().ToString(),
+                Tags = new List<Tag> { new Tag { Key = "key1", Value = "value1" }, new Tag { Key = "key2", Value = "value2" } }
+            };
+
+            Advertiser winner = null;
+            winner = rtService.Advertise(bid);
+
+            Assert.Equal(dbAdvertisers[0].Id, winner.Id);
+            //from notification service, print takes message from queue and calls:
+            advertiserRepository.IncrementPrint(winner, wednesday);
+
+
+            //from 3rd party controlling this node
+            advertiserCache.Update(advertiserRepository.GetAvailableAdvertisers());
+            //also periodically called by controller
+            advertiserRepository.UpdateHourlyPrints();
+
+
+            Assert.Equal(dbAdvertisers[0].Id, winner.Id);
+
+            //next advertiser is different
+            winner = rtService.Advertise(bid);
+            Assert.Null(winner);
+        }
     }
 }

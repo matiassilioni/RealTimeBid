@@ -67,7 +67,6 @@ namespace RealTimeBid.Core
 
             var lockTaken = false;
 
-
             //thread safe references.
             _cachedDataSpinLock.Enter(ref lockTaken);
             foreach (var pair in advPrints)
