@@ -30,7 +30,9 @@ Once all bid tags were iterated, it traverse the list again until it get the fir
 
 implementations of this interface have to push the print to a message queue. Different listeners receive a copy of this message. Each one will do it own work. Microservices for this is the best.
 Those could be:
+
 PrintCountService => calls AdvertiserRepository.IncrementPrint(adv, datetime), or caches a few seconds and calls it's overload.
+
 LoggerService => Logs every print somewhere
 
 
