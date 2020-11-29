@@ -54,6 +54,49 @@ namespace RealTimeBid.Core
             }
         }
 
+
+
+        /// <summary>
+        /// use this method to update prints in batch (for faster process)
+        /// </summary>
+        /// <param name="advPrints"></param>
+        public void IncrementPrint(List<(Advertiser adv, DateTime date)> advPrints)
+        {
+            Dictionary<string, DbAdvertiser> advertisersToUpdate = new Dictionary<string, DbAdvertiser>();
+            Dictionary<string, ulong[]> hoursToUpdate = new Dictionary<string, ulong[]>();
+
+            var lockTaken = false;
+
+
+            //thread safe references.
+            _cachedDataSpinLock.Enter(ref lockTaken);
+            foreach (var pair in advPrints)
+            {
+                if (_hourlyPrints.ContainsKey(pair.adv.Id) && !hoursToUpdate.ContainsKey(pair.adv.Id))
+                {
+                    hoursToUpdate.Add(pair.adv.Id, _hourlyPrints[pair.adv.Id]);
+                    advertisersToUpdate.Add(pair.adv.Id, _cachedData[pair.adv.Id]);
+                }
+            }
+            if (lockTaken) _cachedDataSpinLock.Exit();
+
+            foreach (var pair in advPrints)
+            {
+                if (hoursToUpdate.ContainsKey(pair.adv.Id))
+                {
+                    var hourIndex = _dateTimeService.GetCurrentDateTime().Hour - pair.date.Hour;
+                    if (hourIndex < 0)
+                        hourIndex += 24;
+
+                    var lastModified = Interlocked.Increment(ref hoursToUpdate[pair.adv.Id][hourIndex]);
+                    if (hourIndex == 0) //current
+                    {
+                        advertisersToUpdate[pair.adv.Id].CurrentHourlyPrints = lastModified;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// this method have to be called every period of time to flush cached data to db,
         /// will transform last 24 hour print count array to real datetime to persist/update prints per hour per day.
